@@ -12,11 +12,24 @@ export function NeedSomeSpace(props) {
 
   const { scene } = useGLTF("/models/need_some_space-transformed.glb");
 
-  // 2. CENTER OFFSET: Calculate the real bounding box of the GLB model.
-  // The GLB has an internal origin offset causing it to drift when rotated.
-  // We extract the visual center and return its negative vector to offset it back.
+  // 2. CENTER OFFSET & MATERIAL OVERRIDE: 
+  // Calculate bounding box and force Additive Blending.
   const centerOffset = useMemo(() => {
     if (!scene) return [0, 0, 0];
+    
+    // Phase 1: Ghi đè vật liệu để phục hồi hiệu ứng phát sáng
+    scene.traverse((node) => {
+      if (node.isMesh || node.isPoints) {
+        if (node.material) {
+          node.material.transparent = true;
+          // Loại bỏ hiện tượng các hạt bụi cắt xén/che khuất lẫn nhau
+          node.material.depthWrite = false;
+          // Cộng dồn độ sáng lên nền tối, tạo cảm giác rực lửa
+          node.material.blending = THREE.AdditiveBlending;
+          node.material.needsUpdate = true;
+        }
+      }
+    });
     
     // Compute bounding box
     const box = new THREE.Box3().setFromObject(scene);

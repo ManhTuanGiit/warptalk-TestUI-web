@@ -2,7 +2,8 @@
 
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, Center } from "@react-three/drei";
+import { Center } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { NeedSomeSpace } from "./NeedSomeSpace";
 
 export function HeroScene() {
@@ -15,17 +16,24 @@ export function HeroScene() {
         gl={{ alpha: true, antialias: true }}
         dpr={[1, 2]}
       >
-        {/* Play with light intensities to match the cinematic dark hero vibe */}
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#beffd2" />
-        <directionalLight position={[-10, -10, -5]} intensity={0.5} color="#78ffaa" />
-        <pointLight position={[0, -2, 0]} intensity={1} color="#ffffff" />
+        {/* Galaxies are emissive. Turning off heavy city env-maps and directional 
+            lights ensures dark space feels dark, preventing washed-out colors. */}
+        <ambientLight intensity={0.05} />
 
         <Suspense fallback={null}>
           <Center>
             <NeedSomeSpace />
           </Center>
-          <Environment preset="city" />
+          
+          {/* Phase 2: Post-processing Bloom để làm dải ngân hà rực sáng */}
+          <EffectComposer disableNormalPass>
+            <Bloom 
+              luminanceThreshold={0} 
+              mipmapBlur={true} 
+              luminanceSmoothing={0.9} 
+              intensity={1.5} 
+            />
+          </EffectComposer>
         </Suspense>
       </Canvas>
     </div>
