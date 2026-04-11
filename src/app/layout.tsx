@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { GlobalBackground } from "@/components/layout/global-background";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,7 +41,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen font-sans antialiased bg-transparent dark:text-foreground">
+        <GlobalBackground />
         <Providers>{children}</Providers>
       </body>
     </html>
