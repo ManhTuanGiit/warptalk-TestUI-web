@@ -2,13 +2,14 @@
 
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, Center, OrbitControls } from "@react-three/drei";
+import { Environment, Center } from "@react-three/drei";
 import { NeedSomeSpace } from "./NeedSomeSpace";
 
 export function HeroScene() {
   return (
-    // The canvas must be full width/height and positioned behind content
-    <div className="absolute inset-0 z-0 pointer-events-auto">
+    // The canvas must be full width/height and positioned behind content.
+    // pointer-events-none makes it untouchable according to user request.
+    <div className="absolute inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 4.5], fov: 50 }}
         gl={{ alpha: true, antialias: true }}
@@ -26,17 +27,6 @@ export function HeroScene() {
           </Center>
           <Environment preset="city" />
         </Suspense>
-
-        {/* OrbitControls configured for gentle gentle drag/orbit interaction */}
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          minPolarAngle={Math.PI / 3}
-          maxPolarAngle={Math.PI / 1.5}
-          maxAzimuthAngle={Math.PI / 4}
-          minAzimuthAngle={-Math.PI / 4}
-          makeDefault
-        />
       </Canvas>
     </div>
   );
