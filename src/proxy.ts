@@ -5,7 +5,7 @@ const PUBLIC_ROUTES = ["/", "/pricing", "/about", "/login", "/register", "/forgo
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 const ADMIN_PREFIX = "/admin";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("access_token")?.value;
 
