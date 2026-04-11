@@ -42,8 +42,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased bg-transparent dark:text-foreground">
-        <GlobalBackground />
-        <Providers>{children}</Providers>
+        <Providers>
+          <GlobalBackground />
+          {children}
+        </Providers>
       </body>
     </html>
   );
