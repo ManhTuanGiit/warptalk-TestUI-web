@@ -1,0 +1,130 @@
+/* --- CSS Variables --- */
+:root {
+  /* Default Light Theme */
+  --bg-color: #f8fafc; /* Nền xám trắng nhạt */
+  --text-color: #0f172a; /* Text tối màu */
+  --dot-color: #3b82f6; /* Màu chấm Halftone (Xanh dương) */
+  --button-bg: #0f172a;
+  --button-text: #ffffff;
+  
+  /* Hiệu ứng chuyển cảnh mượt mà */
+  --theme-transition: background-color 0.8s ease, color 0.8s ease;
+}
+
+/* Biến màu cho Dark Theme (Được kích hoạt thông qua HTML data-theme="dark") */
+[data-theme="dark"] {
+  --bg-color: #020617; /* Nền đen/xanh cực đậm */
+  --text-color: #f8fafc; /* Text sáng màu */
+  --dot-color: #60a5fa; /* Màu chấm sáng hơn một chút để nổi bật trên nền tối */
+  --button-bg: #3b82f6;
+  --button-text: #ffffff;
+}
+
+/* --- Base Styling --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: var(--theme-transition);
+  overflow-x: hidden;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Canvas đóng vai trò làm background */
+#halftone-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: auto; /* Bắt sự kiện chuột cho hiệu ứng hover */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1; /* Hiển thị phía trên Canvas */
+  text-align: center;
+  pointer-events: none; /* Không cản trở sự kiện di chuột xuống canvas */
+}
+
+.hero-title {
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  transition: var(--theme-transition);
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  opacity: 0.8;
+  margin-bottom: 2.5rem;
+  transition: var(--theme-transition);
+}
+
+.cta-button {
+  pointer-events: auto; /* Trả lại khả năng click cho nút */
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .cta-button:hover {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+}
+
+/* --- Section Content bên dưới --- */
+.content-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.content-wrapper {
+  max-width: 800px;
+  text-align: center;
+}
+
+.content-wrapper h2 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  transition: var(--theme-transition);
+}
+
+.content-wrapper p {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  line-height: 1.8;
+  transition: var(--theme-transition);
+}
