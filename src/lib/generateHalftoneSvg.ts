@@ -5,144 +5,117 @@ export interface HalftoneDot {
 }
 
 export interface HalftoneConfig {
+  /** Grid cell size in pixels at internal sampling resolution */
   spacing: number;
+  /** Max dot radius as a fraction of spacing (0–0.5 recommended) */
   maxDotRadiusRatio: number;
-  subjectThreshold: number;
-  shadowRetention: number;
+  /**
+   * Luminance threshold (0–1).
+   * Pixels ABOVE this value are treated as bright hand subject → rendered as dots.
+   * Pixels BELOW this value are dark background → discarded entirely.
+   */
+  brightThreshold: number;
 }
 
-export async function generateHalftoneSvg(
+/**
+ * Samples the source image onto an offscreen canvas at internal resolution
+ * (sampleW × sampleH), isolates bright subject pixels, and returns halftone
+ * dots in that same coordinate space.
+ *
+ * The caller should render these dots inside an SVG with
+ *   viewBox="0 0 {sampleW} {sampleH}"
+ * and let CSS control the display size.
+ */
+export async function generateHalftoneDots(
   imageUrl: string,
-  rawWidth: number,
-  rawHeight: number,
+  sampleW: number,
+  sampleH: number,
   config: HalftoneConfig
 ): Promise<HalftoneDot[]> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      return resolve([]); // SSR fallback
-    }
+  const { spacing, maxDotRadiusRatio, brightThreshold } = config;
 
-    // CRITICAL FIX: Ensure width and height are integers. 
-    // ResizeObserver can return fractional dimensions which breaks array indexing!
-    const width = Math.floor(rawWidth);
-    const height = Math.floor(rawHeight);
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve([]);
 
-    if (width <= 0 || height <= 0) {
-      return resolve([]);
-    }
+    const w = Math.floor(sampleW);
+    const h = Math.floor(sampleH);
+    if (w <= 0 || h <= 0) return resolve([]);
 
     const img = new Image();
-    if (imageUrl.startsWith("http")) {
-      img.crossOrigin = "anonymous";
-    }
+    img.crossOrigin = "anonymous";
     img.src = imageUrl;
 
     img.onload = () => {
-      // Calculate scaled dimensions to cover the area
       const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return resolve([]);
 
-      if (!ctx) {
-        return reject(new Error("Failed to get 2D context"));
-      }
-
-      // Draw image to cover (object-fit: cover logic)
-      // For hands to enter from sides and meet in the center, cover usually works well.
-      const imgRatio = img.width / img.height;
-      const targetRatio = width / height;
-      let drawWidth = width;
-      let drawHeight = height;
-      let offsetX = 0;
-      let offsetY = 0;
-
-      // Make the image slightly larger to ensure hands reach the center properly
-      // A 1.1x multiplier adds a bit of framing punch
-      const scaleMultiplier = 1.1; 
-
-      if (imgRatio > targetRatio) {
-        // Image is wider than target
-        drawWidth = height * imgRatio * scaleMultiplier;
-        drawHeight = height * scaleMultiplier;
+      // Draw image to fill the canvas (cover)
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canRatio = w / h;
+      let dw = w, dh = h, ox = 0, oy = 0;
+      if (imgRatio > canRatio) {
+        dw = h * imgRatio;
+        ox = (w - dw) / 2;
       } else {
-        // Image is taller than target
-        drawHeight = width / imgRatio * scaleMultiplier;
-        drawWidth = width * scaleMultiplier;
+        dh = w / imgRatio;
+        oy = (h - dh) / 2;
       }
-      
-      offsetX = (width - drawWidth) / 2;
-      offsetY = (height - drawHeight) / 2;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, ox, oy, dw, dh);
 
       try {
-        ctx.clearRect(0, 0, width, height); // Ensure transparent background
-        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-
-        const imageData = ctx.getImageData(0, 0, width, height);
-        const pixels = imageData.data;
+        const { data } = ctx.getImageData(0, 0, w, h);
         const dots: HalftoneDot[] = [];
 
-        const { spacing, maxDotRadiusRatio, subjectThreshold, shadowRetention } = config;
-        const cols = Math.floor(width / spacing);
-        const rows = Math.floor(height / spacing);
-        const maxRadius = spacing * maxDotRadiusRatio;
+        const cols = Math.floor(w / spacing);
+        const rows = Math.floor(h / spacing);
+        const maxR = spacing * maxDotRadiusRatio;
+        const minR = spacing * 0.06;
 
-        for (let y = 0; y < rows; y++) {
-          for (let x = 0; x < cols; x++) {
-            const centerX = x * spacing + spacing / 2;
-            const centerY = y * spacing + spacing / 2;
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const cx = col * spacing + spacing / 2;
+            const cy = row * spacing + spacing / 2;
 
-            const px = Math.floor(centerX);
-            const py = Math.floor(centerY);
-            
-            if (px >= width || py >= height) continue;
+            const px = Math.min(Math.floor(cx), w - 1);
+            const py = Math.min(Math.floor(cy), h - 1);
+            const i = (py * w + px) * 4;
 
-            const idx = (py * width + px) * 4;
-            const r = pixels[idx];
-            const g = pixels[idx + 1];
-            const b = pixels[idx + 2];
-            const a = pixels[idx + 3];
+            const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
 
-            // 1. Alpha Check: If the image has transparency, skip fully transparent pixels
-            if (a < 10) continue; 
+            // Treat fully transparent pixels as background
+            if (a < 20) continue;
 
-            // 2. Luminance Calculation
-            const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-            
-            // 3. Ink Density
-            // Dark pixels = high density (large dots), Bright pixels = low density (small dots/empty)
-            const inkDensity = 1 - luminance;
+            // Perceived luminance
+            const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
-            // 4. Subject Isolation via Thresholding
-            // Drop very light pixels (white background)
-            if (inkDensity < subjectThreshold) {
-              continue;
-            }
-            
-            // 5. Dot Radius Calculation
-            // shadowRetention boosts the darkness of shadows to ensure solid forms
-            let contrastDensity = Math.min(1, inkDensity * shadowRetention);
-            
-            // Minimum radius ensures the shape doesn't completely vanish at edges
-            const minRadius = spacing * 0.1;
-            const radius = minRadius + contrastDensity * (maxRadius - minRadius);
+            // Only bright pixels survive → they are the hand subject
+            if (lum < brightThreshold) continue;
 
-            dots.push({ x: centerX, y: centerY, baseRadius: radius });
+            // Scale dot radius with brightness
+            const norm = (lum - brightThreshold) / (1 - brightThreshold);
+            const radius = minR + norm * (maxR - minR);
+            if (isNaN(radius) || radius <= 0) continue;
+
+            dots.push({ x: cx, y: cy, baseRadius: radius });
           }
         }
+
+        console.log(`[halftone] generated ${dots.length} dots at ${w}×${h}`);
         resolve(dots);
       } catch (err) {
-        console.warn("Canvas SecurityError or drawing failed. Using fallback.", err);
+        console.warn("[halftone] canvas error:", err);
         resolve([]);
       }
     };
 
     img.onerror = () => {
-      console.warn(`Failed to load image at ${imageUrl}.`);
+      console.warn("[halftone] image load failed:", imageUrl);
       resolve([]);
     };
   });
 }
-
-
-

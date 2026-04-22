@@ -4,55 +4,50 @@ import { Navbar } from "./Navbar";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen w-full flex flex-col overflow-hidden bg-[var(--ht-bg)] theme-transition">
-      {/* Include Navbar above the hero */}
+    <section className="relative min-h-screen w-full flex flex-col bg-white overflow-hidden">
       <Navbar />
 
-      {/* 
-        HALFTONE BACKGROUND LAYER 
-        It sits behind the content, presenting the animated dot-field.
-        We ensure it only takes up the first screen height.
+      {/*
+        ─── HERO BODY ───────────────────────────────────────────────
+        A full-height flex column centred vertically.
+        The halftone SVG sits below the headline block as an art element.
       */}
-      <HeroHalftone 
-        imageUrl="/hands.png" 
-        config={{
-          spacing: 12,
-          maxDotRadiusRatio: 0.45,
-          subjectThreshold: 0.05,
-          shadowRetention: 1.5
-        }}
-        sweepSpeed={1200}
-        sweepSoftness={800}
-      />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pt-24 pb-0 gap-0">
 
-      {/* 
-        CONTENT LAYER 
-        Positioned relatively to be pulled above the halftone canvas (z-10).
-      */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 mt-20 pointer-events-none">
-        
-        {/* Minimal Transparent Wrapper */}
-        <div className="w-full max-w-4xl text-center pointer-events-auto">
-          
-          <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-sans font-semibold tracking-tighter text-[var(--ht-text)] mb-6 leading-[1.05] theme-transition">
-            Rebooting the <br className="hidden md:block"/>
-            Creative Connection.
+        {/* Copy block */}
+        <div className="w-full max-w-2xl text-center">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-sans font-semibold tracking-tighter text-black mb-5 leading-[1.05]">
+            Rebooting the<br className="hidden md:block" /> Creative Connection.
           </h1>
-
-          <p className="text-lg md:text-xl font-sans font-light text-[var(--ht-text)] opacity-60 mb-10 max-w-2xl mx-auto leading-relaxed theme-transition">
-            We're not building another platform. We're building a place where people belong.
+          <p className="text-lg md:text-xl font-sans font-light text-black/55 mb-8 max-w-lg mx-auto leading-relaxed">
+            We&apos;re not building another platform. We&apos;re building a place where people belong.
           </p>
-
           <div className="flex justify-center">
-            <button className="px-8 py-3.5 bg-[var(--ht-text)] text-[var(--ht-bg)] rounded-full font-medium transition-transform hover:scale-105 shadow-md theme-transition">
+            <button className="px-8 py-3.5 bg-black text-white rounded-full text-sm font-medium tracking-wide transition-transform hover:scale-105">
               Join our World
             </button>
           </div>
-
         </div>
+
+        {/*
+          ─── HALFTONE HANDS COMPOSITION ─────────────────────────────
+          One continuous SVG of the touching-hands subject.
+          Positioned below the copy, taking the full remaining width.
+          max-w caps it so it stays compositionally centred.
+          The SVG viewBox is 900×540 and scales proportionally via CSS.
+        */}
+        <div className="w-full max-w-5xl mt-4">
+          <HeroHalftone
+            imageUrl="/hands.png"
+            brightThreshold={0.28}
+            spacing={11}
+            sweepSpeed={480}
+            sweepSoftness={260}
+            className="w-full"
+          />
+        </div>
+
       </div>
     </section>
   );
 }
-
-
