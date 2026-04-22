@@ -16,8 +16,8 @@ export function HeroSection() {
         <HeroHalftone
           imageUrl="/hands.png"
           brightThreshold={0.28}
-          spacing={12}
-          sweepSpeed={250} // Slower speed for the continuous looping wave
+          spacing={7}
+          sweepSpeed={350} // Slightly faster to compensate for the much wider STABLE_W
         />
       </div>
 

@@ -63,7 +63,7 @@ export async function generateHalftoneDots(
         const cols = Math.floor(w / spacing);
         const rows = Math.floor(h / spacing);
         const maxR = spacing * maxDotRadiusRatio;
-        const minR = spacing * 0.05;
+        const minR = spacing * 0.03; // Even smaller minimum dot for finer subtle details
 
         for (let row = 0; row < rows; row++) {
           for (let col = 0; col < cols; col++) {
@@ -85,11 +85,13 @@ export async function generateHalftoneDots(
             // ISOLATION: Only bright pixels (the hands) are kept.
             if (lum < brightThreshold) continue;
 
-            // Map brightness to dot radius (Halftone look)
+            // Map brightness to dot area (Halftone look: area is proportional to luminance)
             const norm = (lum - brightThreshold) / (1 - brightThreshold);
-            const radius = minR + norm * (maxR - minR);
             
-            if (radius > 0.1) {
+            // Math.sqrt(norm) creates a perceptually smoother tonal gradient
+            const radius = minR + Math.sqrt(norm) * (maxR - minR);
+            
+            if (radius > 0.05) {
               dots.push({ x: cx, y: cy, baseRadius: radius });
             }
           }

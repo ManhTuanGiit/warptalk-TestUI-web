@@ -5,14 +5,14 @@ import { generateHalftoneDots, HalftoneDot } from "@/lib/generateHalftoneSvg";
 
 /**
  * Stable internal sampling resolution.
- * To achieve the "side-entering" effect, we use a wide aspect ratio.
+ * Significantly increased resolution for higher visual fidelity and anatomical detail.
  */
-const STABLE_W = 1600;
-const STABLE_H = 600;
+const STABLE_W = 2200;
+const STABLE_H = 825;
 
 const DEFAULT_CONFIG = {
-  spacing: 12,
-  maxDotRadiusRatio: 0.44,
+  spacing: 7, // Much denser grid for finer detail
+  maxDotRadiusRatio: 0.40, // Slightly smaller max ratio to keep the grid clean
   brightThreshold: 0.28,
 };
 
