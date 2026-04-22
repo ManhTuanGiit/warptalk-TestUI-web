@@ -15,9 +15,9 @@ export function HeroSection() {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <HeroHalftone
           imageUrl="/hands.png"
-          brightThreshold={0.28}
-          spacing={7}
-          sweepSpeed={350} // Slightly faster to compensate for the much wider STABLE_W
+          brightThreshold={0.22}
+          spacing={4.5}
+          sweepSpeed={400} // Tuned for the new 2800px width
         />
       </div>
 

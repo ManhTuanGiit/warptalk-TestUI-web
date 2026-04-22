@@ -5,15 +5,15 @@ import { generateHalftoneDots, HalftoneDot } from "@/lib/generateHalftoneSvg";
 
 /**
  * Stable internal sampling resolution.
- * Significantly increased resolution for higher visual fidelity and anatomical detail.
+ * Pushed to extreme high-res to capture very fine hand anatomy.
  */
-const STABLE_W = 2200;
-const STABLE_H = 825;
+const STABLE_W = 2800;
+const STABLE_H = 1050;
 
 const DEFAULT_CONFIG = {
-  spacing: 7, // Much denser grid for finer detail
-  maxDotRadiusRatio: 0.40, // Slightly smaller max ratio to keep the grid clean
-  brightThreshold: 0.28,
+  spacing: 4.5, // Extreme density grid
+  maxDotRadiusRatio: 0.35, // Smaller dots to prevent chunky overlaps
+  brightThreshold: 0.22, // Lowered to pull in more shadow detail and contours
 };
 
 interface HeroHalftoneProps {
@@ -29,14 +29,10 @@ export function HeroHalftone({
   imageUrl,
   brightThreshold = DEFAULT_CONFIG.brightThreshold,
   spacing = DEFAULT_CONFIG.spacing,
-  sweepSpeed = 250,    // Stable coordinate units per second for the continuous wave
-  sweepSoftness = 400, // Not strictly used for the wave, but kept for signature
   className = "",
 }: HeroHalftoneProps) {
   const [dots, setDots] = useState<HalftoneDot[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const circleRefs = useRef<(SVGCircleElement | null)[]>([]);
-  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -54,61 +50,10 @@ export function HeroHalftone({
       maxDotRadiusRatio: DEFAULT_CONFIG.maxDotRadiusRatio,
       brightThreshold,
     }).then((d) => {
-      if (active) {
-        circleRefs.current = new Array(d.length).fill(null);
-        setDots(d);
-      }
+      if (active) setDots(d);
     });
     return () => { active = false; };
   }, [imageUrl, spacing, brightThreshold]);
-
-  // Primary animation loop: Continuous left-to-right traveling wave
-  useEffect(() => {
-    if (dots.length === 0 || prefersReducedMotion) return;
-
-    const startTime = performance.now();
-    const waveLength = STABLE_W * 1.5; // How wide the wave is
-
-    const frame = (now: number) => {
-      const elapsed = (now - startTime) / 1000;
-      const shift = elapsed * sweepSpeed;
-
-      for (let i = 0; i < dots.length; i++) {
-        const circle = circleRefs.current[i];
-        if (!circle) continue;
-        const dot = dots[i];
-
-        // Position along the moving wave, wraps around
-        const wavePos = ((dot.x - shift) % waveLength + waveLength) % waveLength;
-        const phase = wavePos / waveLength; // 0 to 1
-
-        let multiplier = 0.1; // Minimum visibility (10%)
-        
-        // Easing function for smooth transitions
-        const smooth = (x: number) => x * x * (3 - 2 * x);
-
-        // 0 to 20%: Fade In
-        if (phase < 0.2) {
-          multiplier = 0.1 + 0.9 * smooth(phase / 0.2);
-        } 
-        // 20% to 80%: Fully Revealed
-        else if (phase < 0.8) {
-          multiplier = 1.0;
-        } 
-        // 80% to 100%: Fade Out smoothly back to 10%
-        else {
-          multiplier = 1.0 - 0.9 * smooth((phase - 0.8) / 0.2);
-        }
-
-        circle.setAttribute("r", (dot.baseRadius * multiplier).toFixed(2));
-      }
-
-      rafRef.current = requestAnimationFrame(frame);
-    };
-
-    rafRef.current = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [dots, prefersReducedMotion, sweepSpeed]);
 
   return (
     <div 
@@ -130,14 +75,32 @@ export function HeroHalftone({
         }}
         aria-hidden="true"
       >
-        <g fill="black">
+        <defs>
+          <linearGradient id="sweep-gradient" gradientUnits="userSpaceOnUse" x1="-1500" y1="0" x2="0" y2="0">
+            {/* 20% opacity at ends, 100% in the middle. #333333 is 20% white. */}
+            <stop offset="0%" stopColor="#333333" />
+            <stop offset="25%" stopColor="#ffffff" />
+            <stop offset="75%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#333333" />
+            {!prefersReducedMotion && (
+              <animate attributeName="x1" values="-1500; 2800" dur="8s" repeatCount="indefinite" />
+            )}
+            {!prefersReducedMotion && (
+              <animate attributeName="x2" values="0; 4300" dur="8s" repeatCount="indefinite" />
+            )}
+          </linearGradient>
+          <mask id="sweep-mask">
+            <rect x="-1500" y="0" width="6000" height="100%" fill="url(#sweep-gradient)" />
+          </mask>
+        </defs>
+
+        <g fill="black" mask="url(#sweep-mask)">
           {dots.map((dot, i) => (
             <circle
               key={i}
-              ref={(el) => { circleRefs.current[i] = el; }}
               cx={dot.x}
               cy={dot.y}
-              r={prefersReducedMotion ? dot.baseRadius : 0}
+              r={dot.baseRadius}
             />
           ))}
         </g>

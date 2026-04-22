@@ -85,13 +85,14 @@ export async function generateHalftoneDots(
             // ISOLATION: Only bright pixels (the hands) are kept.
             if (lum < brightThreshold) continue;
 
-            // Map brightness to dot area (Halftone look: area is proportional to luminance)
+            // Map brightness to dot area with a gamma curve (exponent 0.65)
+            // This preserves significantly more tonal detail in the midtones and knuckles.
             const norm = (lum - brightThreshold) / (1 - brightThreshold);
             
-            // Math.sqrt(norm) creates a perceptually smoother tonal gradient
-            const radius = minR + Math.sqrt(norm) * (maxR - minR);
+            const radius = minR + Math.pow(norm, 0.65) * (maxR - minR);
             
-            if (radius > 0.05) {
+            // Allow dots to get extremely small before clipping
+            if (radius > 0.02) {
               dots.push({ x: cx, y: cy, baseRadius: radius });
             }
           }
