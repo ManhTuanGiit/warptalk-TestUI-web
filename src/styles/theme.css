@@ -1,7 +1,7 @@
 /* src/styles/theme.css */
 
-:root {
-  /* Light Theme - Default */
+:root, .dark {
+  /* Forced Monochrome Theme */
   --ht-bg: #ffffff;
   --ht-text: #000000;
   --ht-dot: #000000;
@@ -9,13 +9,6 @@
   /* Smooth theme transition */
   --theme-transition-duration: 600ms;
   --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark {
-  /* Dark Theme */
-  --ht-bg: #000000;
-  --ht-text: #ffffff;
-  --ht-dot: #ffffff;
 }
 
 /* Halftone Container Theme Transition */

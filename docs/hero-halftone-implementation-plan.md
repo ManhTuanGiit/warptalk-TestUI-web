@@ -20,24 +20,24 @@ The hero must visually reference:
 ## 2. Core Requirements
 
 ### Rendering
-- The final hero artwork must render as **inline SVG**
+- The final hero artwork must render as inline SVG
 - Offscreen canvas may be used only for:
   - image sampling
   - luminance analysis
   - thresholding
   - mask extraction
-- The final visual output must **not** be rasterized
+- The final visual output must not be rasterized
 - The SVG must stay crisp when scaled across desktop and mobile breakpoints
 
 ### Subject
-- The source asset is a **two-hands image already placed inside the project**
-- The halftone must follow **only the hand subject**
-- Do **not** render the full photo rectangle as halftone
+- The source asset is a two-hands image already placed inside the project
+- The halftone must follow only the hand subject
+- Do not render the full photo rectangle as halftone
 - The background of the original image must not dominate the final dot field
 
 ### Motion
-- Primary motion: **controlled left-to-right sweep / reveal**
-- Secondary motion: **very subtle dot modulation** after reveal
+- Primary motion: controlled left-to-right sweep / reveal
+- Secondary motion: very subtle dot modulation after reveal
 - Motion must feel deterministic, calm, and art-directed
 - Avoid noisy, chaotic, random, or flashy particle behavior
 
@@ -53,7 +53,7 @@ The hero must visually reference:
 - Theme changes must preserve contrast and readability
 
 ### Accessibility and Performance
-- Always support `prefers-reduced-motion`
+- Always support prefers-reduced-motion
 - Build the dot field once, then animate efficiently
 - Keep dot count within a performance-safe range
 - Keep tuning parameters easy to adjust without rewriting core logic
@@ -126,7 +126,7 @@ Preferred strategy:
 Important:
 - Do not rely on a naive threshold alone if it destroys hand detail
 - Do not allow the dark original photo background to fill the SVG with unwanted dots
-- The final result should clearly read as **two hands**, not as a generic textured field
+- The final result should clearly read as two hands, not as a generic textured field
 
 ---
 
@@ -226,10 +226,10 @@ Animation should reinforce the composition, not dominate it.
 ### Animation Implementation
 - Avoid React state updates for thousands of animated nodes
 - Use refs and direct DOM mutation for the circle attributes
-- Use a single `requestAnimationFrame` loop for efficient updates
+- Use a single requestAnimationFrame loop for efficient updates
 
 ### Reduced Motion
-- If `prefers-reduced-motion: reduce` is enabled:
+- If prefers-reduced-motion: reduce is enabled:
   - skip continuous animation
   - render the final static halftone state immediately
 
@@ -248,7 +248,7 @@ Animation should reinforce the composition, not dominate it.
   - dot color
   - muted text
   - CTA contrast if needed
-- Use section visibility or `IntersectionObserver` logic to switch theme state
+- Use section visibility or IntersectionObserver logic to switch theme state
 - Preserve readability during all theme transitions
 
 ### Requirements
@@ -278,7 +278,7 @@ Animation should reinforce the composition, not dominate it.
 - Target a safe SVG circle count for a landing-page hero
 
 ### Motion Accessibility
-- Respect `prefers-reduced-motion`
+- Respect prefers-reduced-motion
 - Ensure the hero still looks intentional and high-quality when motion is disabled
 
 ---

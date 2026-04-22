@@ -1,21 +1,40 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { generateHalftoneSvg, HalftoneDot, HalftoneConfig } from "@/lib/generateHalftoneSvg";
 import "@/styles/theme.css";
 
 interface HeroHalftoneProps {
-  spacing?: number; // Distance between dots
+  imageUrl: string;
+  config?: Partial<HalftoneConfig>;
   className?: string;
+  sweepSpeed?: number;
+  sweepSoftness?: number;
+  pulseAmplitude?: number;
+  pulseSpeed?: number;
 }
 
+const DEFAULT_CONFIG: HalftoneConfig = {
+  spacing: 14,
+  maxDotRadiusRatio: 0.45,
+  subjectThreshold: 0.1, // Drop pixels lighter than this density
+  shadowRetention: 1.2, // Boost contrast of valid pixels
+};
+
 export function HeroHalftone({
-  spacing = 22,
+  imageUrl,
+  config = {},
   className = "",
+  sweepSpeed = 1200, // Pixels per second
+  sweepSoftness = 800, // Fade in duration in pixels
+  pulseAmplitude = 0.05, // 5% radius modulation
+  pulseSpeed = 1.5,
 }: HeroHalftoneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const circleRefs = useRef<(SVGCircleElement | null)[]>([]);
   
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dots, setDots] = useState<HalftoneDot[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // 1. Detect Reduced Motion
@@ -34,96 +53,70 @@ export function HeroHalftone({
     const observer = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => setDimensions({ width, height }), 100);
+      // Debounce window resizing
+      timeoutId = setTimeout(() => setDimensions({ width, height }), 150);
     });
     observer.observe(containerRef.current);
     return () => { observer.disconnect(); clearTimeout(timeoutId); };
   }, []);
 
-  // 3. Generate Mathematical Grid
-  const dots = useMemo(() => {
-    if (dimensions.width === 0 || dimensions.height === 0) return [];
-    
-    // Add extra padding to cover edges during wave motion
-    const cols = Math.ceil(dimensions.width / spacing) + 4;
-    const rows = Math.ceil(dimensions.height / spacing) + 4;
-    
-    const newDots = [];
-    for (let y = -2; y < rows; y++) {
-      for (let x = -2; x < cols; x++) {
-        newDots.push({
-          x: x * spacing,
-          y: y * spacing,
-          col: x,
-          row: y
-        });
-      }
-    }
-    circleRefs.current = new Array(newDots.length).fill(null);
-    return newDots;
-  }, [dimensions, spacing]);
+  // 3. Generate Halftone Data from Image
+  useEffect(() => {
+    if (dimensions.width === 0 || dimensions.height === 0 || !imageUrl) return;
 
-  // 4. Animation Loop
+    let isMounted = true;
+    const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+
+    generateHalftoneSvg(imageUrl, dimensions.width, dimensions.height, mergedConfig)
+      .then((generatedDots) => {
+        if (isMounted) {
+          // Filter out any NaN radii just in case
+          const validDots = generatedDots.filter(d => !isNaN(d.baseRadius));
+          if (validDots.length < generatedDots.length) {
+             console.warn(`Filtered out ${generatedDots.length - validDots.length} dots with NaN radius.`);
+          }
+          circleRefs.current = new Array(validDots.length).fill(null);
+          setDots(validDots);
+        }
+      })
+      .catch((err) => console.error("[HeroHalftone] Error generating halftone:", err));
+
+    return () => { isMounted = false; };
+  }, [imageUrl, dimensions, config.spacing, config.maxDotRadiusRatio, config.subjectThreshold, config.shadowRetention]);
+
+  // 4. Animation Loop via direct DOM mutation
   useEffect(() => {
     if (dots.length === 0 || prefersReducedMotion) return;
 
     let animationFrameId: number;
     let startTime = performance.now();
-    
-    const { width, height } = dimensions;
-    const cx = width / 2;
-    const cy = height / 2;
 
     const animate = (time: number) => {
       const t = (time - startTime) * 0.001; 
-      
+
       dots.forEach((dot, index) => {
         const circle = circleRefs.current[index];
         if (!circle) return;
 
-        // Base coordinates
-        const bx = dot.x;
-        const by = dot.y;
-
-        // 1. Fluid Wave Calculation (Moving right to left)
-        const flowSpeed = 1.2;
-        const phaseX = bx * 0.003 - t * flowSpeed;
-        const phaseY = by * 0.005;
+        // Primary Motion: Sweep from left to right
+        const sweepProgress = (t * sweepSpeed) - dot.x;
         
-        // Complex wave combining sine and cosine for terrain feel
-        const wave1 = Math.sin(phaseX + phaseY);
-        const wave2 = Math.cos(phaseX * 1.5 - phaseY * 0.8 + t * 0.5);
-        const combinedWave = (wave1 + wave2) * 0.5; // Range ~ [-1, 1]
-        
-        // 3. Central Mask (Fade out dots in the middle so text is visible)
-        // Create an elliptical mask
-        const dx = bx - cx;
-        const dy = by - cy; // Keep it fixed on Y
-        // Elliptical distance: squash the Y axis so the mask is wider horizontally
-        const distToCenter = Math.sqrt((dx * dx) + (dy * dy * 4)); 
-        
-        const maskRadius = 400; // Radius of the clearing
-        const maskFeather = 250;
-        
-        let maskAlpha = 1;
-        if (distToCenter < maskRadius) {
-          maskAlpha = 0; // Completely hidden in center
-        } else if (distToCenter < maskRadius + maskFeather) {
-          // Smooth fade out
-          maskAlpha = (distToCenter - maskRadius) / maskFeather;
+        let revealMultiplier = 0;
+        if (sweepProgress > 0) {
+          revealMultiplier = Math.min(1, sweepProgress / sweepSoftness); 
         }
 
-        // 4. Calculate Final Radius
-        // Map wave [-1, 1] to dot size [0.1, 0.45]
-        const sizeFactor = (combinedWave + 1) * 0.5; // [0, 1]
-        const maxR = spacing * 0.45;
-        const minR = spacing * 0.05;
-        
-        let finalRadius = minR + sizeFactor * (maxR - minR);
-        finalRadius *= maskAlpha; // Apply center mask
+        // Secondary Motion: Subtle pulse once revealed
+        let pulse = 1;
+        if (revealMultiplier >= 1) {
+          pulse = 1 + Math.sin(t * pulseSpeed + dot.x * 0.01) * pulseAmplitude;
+        }
 
-        // DOM Mutation: ONLY animate radius, NO vertical displacement
-        circle.setAttribute("r", finalRadius.toFixed(2));
+        // Final radius calculation
+        const finalRadius = dot.baseRadius * revealMultiplier * pulse;
+        
+        // Mutate DOM directly: ONLY change radius, NO x/y movement
+        circle.setAttribute("r", (isNaN(finalRadius) ? 0 : finalRadius).toFixed(2));
       });
 
       animationFrameId = requestAnimationFrame(animate);
@@ -131,22 +124,23 @@ export function HeroHalftone({
 
     animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [dots, prefersReducedMotion, dimensions, spacing]);
+  }, [dots, prefersReducedMotion, sweepSpeed, sweepSoftness, pulseAmplitude, pulseSpeed]);
 
   return (
     <div 
       ref={containerRef} 
-      className={`absolute inset-0 z-0 overflow-hidden theme-transition bg-[var(--ht-bg)] ${className}`}
+      className={`absolute inset-0 z-0 overflow-hidden theme-transition ${className}`}
+      style={{ pointerEvents: "none" }}
     >
       <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="block">
         <g fill="var(--ht-dot)">
           {dots.map((dot, i) => (
             <circle
-              key={`${dot.col}-${dot.row}`}
+              key={`${dot.x}-${dot.y}`}
               ref={(el) => { circleRefs.current[i] = el; }}
               cx={dot.x}
               cy={dot.y}
-              r={prefersReducedMotion ? spacing * 0.2 : 0}
+              r={prefersReducedMotion ? (isNaN(dot.baseRadius) ? 0 : dot.baseRadius) : 0}
             />
           ))}
         </g>
@@ -154,3 +148,6 @@ export function HeroHalftone({
     </div>
   );
 }
+
+
+
