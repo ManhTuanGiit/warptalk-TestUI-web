@@ -5,26 +5,14 @@ export interface HalftoneDot {
 }
 
 export interface HalftoneConfig {
-  /** Grid cell size in pixels at internal sampling resolution */
   spacing: number;
-  /** Max dot radius as a fraction of spacing (0–0.5 recommended) */
   maxDotRadiusRatio: number;
-  /**
-   * Luminance threshold (0–1).
-   * Pixels ABOVE this value are treated as bright hand subject → rendered as dots.
-   * Pixels BELOW this value are dark background → discarded entirely.
-   */
   brightThreshold: number;
 }
 
 /**
- * Samples the source image onto an offscreen canvas at internal resolution
- * (sampleW × sampleH), isolates bright subject pixels, and returns halftone
- * dots in that same coordinate space.
- *
- * The caller should render these dots inside an SVG with
- *   viewBox="0 0 {sampleW} {sampleH}"
- * and let CSS control the display size.
+ * Samples the source image and isolates the bright hand subject.
+ * Returns dots in a stable internal coordinate space (sampleW x sampleH).
  */
 export async function generateHalftoneDots(
   imageUrl: string,
@@ -56,6 +44,7 @@ export async function generateHalftoneDots(
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canRatio = w / h;
       let dw = w, dh = h, ox = 0, oy = 0;
+      
       if (imgRatio > canRatio) {
         dw = h * imgRatio;
         ox = (w - dw) / 2;
@@ -74,7 +63,7 @@ export async function generateHalftoneDots(
         const cols = Math.floor(w / spacing);
         const rows = Math.floor(h / spacing);
         const maxR = spacing * maxDotRadiusRatio;
-        const minR = spacing * 0.06;
+        const minR = spacing * 0.05;
 
         for (let row = 0; row < rows; row++) {
           for (let col = 0; col < cols; col++) {
@@ -87,34 +76,35 @@ export async function generateHalftoneDots(
 
             const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
 
-            // Treat fully transparent pixels as background
+            // Ignore transparent background
             if (a < 20) continue;
 
             // Perceived luminance
             const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
-            // Only bright pixels survive → they are the hand subject
+            // ISOLATION: Only bright pixels (the hands) are kept.
             if (lum < brightThreshold) continue;
 
-            // Scale dot radius with brightness
+            // Map brightness to dot radius (Halftone look)
             const norm = (lum - brightThreshold) / (1 - brightThreshold);
             const radius = minR + norm * (maxR - minR);
-            if (isNaN(radius) || radius <= 0) continue;
-
-            dots.push({ x: cx, y: cy, baseRadius: radius });
+            
+            if (radius > 0.1) {
+              dots.push({ x: cx, y: cy, baseRadius: radius });
+            }
           }
         }
 
-        console.log(`[halftone] generated ${dots.length} dots at ${w}×${h}`);
+        console.log(`[halftone] Isolation successful: generated ${dots.length} dots.`);
         resolve(dots);
       } catch (err) {
-        console.warn("[halftone] canvas error:", err);
+        console.warn("[halftone] processing error:", err);
         resolve([]);
       }
     };
 
     img.onerror = () => {
-      console.warn("[halftone] image load failed:", imageUrl);
+      console.warn("[halftone] failed to load asset:", imageUrl);
       resolve([]);
     };
   });

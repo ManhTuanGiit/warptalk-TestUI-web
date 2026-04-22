@@ -3,36 +3,34 @@
 import React, { useEffect, useRef, useState } from "react";
 import { generateHalftoneDots, HalftoneDot } from "@/lib/generateHalftoneSvg";
 
-// ─────────────────────────────────────────
-// Internal sampling resolution.
-// All dots are generated in this coordinate space.
-// The SVG uses a matching viewBox and CSS scales the display.
-// ─────────────────────────────────────────
-const SAMPLE_W = 900;
-const SAMPLE_H = 540;
+/**
+ * Stable internal sampling resolution.
+ * To achieve the "side-entering" effect, we use a wide aspect ratio.
+ */
+const STABLE_W = 1600;
+const STABLE_H = 600;
 
-const CONFIG = {
-  spacing: 11,          // tighter grid = more dot density / definition
+const DEFAULT_CONFIG = {
+  spacing: 12,
   maxDotRadiusRatio: 0.44,
-  brightThreshold: 0.28, // tune: raise if too many bg dots, lower if hands are sparse
+  brightThreshold: 0.28,
 };
 
 interface HeroHalftoneProps {
   imageUrl: string;
-  /** Optionally override config */
   brightThreshold?: number;
   spacing?: number;
-  sweepSpeed?: number;   // px/s in viewBox coords — e.g. 500
-  sweepSoftness?: number; // px fade width — e.g. 250
+  sweepSpeed?: number;
+  sweepSoftness?: number;
   className?: string;
 }
 
 export function HeroHalftone({
   imageUrl,
-  brightThreshold = CONFIG.brightThreshold,
-  spacing = CONFIG.spacing,
-  sweepSpeed = 480,
-  sweepSoftness = 260,
+  brightThreshold = DEFAULT_CONFIG.brightThreshold,
+  spacing = DEFAULT_CONFIG.spacing,
+  sweepSpeed = 250,    // Stable coordinate units per second for the continuous wave
+  sweepSoftness = 400, // Not strictly used for the wave, but kept for signature
   className = "",
 }: HeroHalftoneProps) {
   const [dots, setDots] = useState<HalftoneDot[]>([]);
@@ -40,84 +38,110 @@ export function HeroHalftone({
   const circleRefs = useRef<(SVGCircleElement | null)[]>([]);
   const rafRef = useRef<number>(0);
 
-  // Reduced-motion detection
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mq.matches);
-    const h = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mq.addEventListener("change", h);
-    return () => mq.removeEventListener("change", h);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Generate dots once at mount (fixed internal resolution)
+  // Generate dots once based on the stable coordinate system
   useEffect(() => {
-    let alive = true;
-    generateHalftoneDots(imageUrl, SAMPLE_W, SAMPLE_H, {
+    let active = true;
+    generateHalftoneDots(imageUrl, STABLE_W, STABLE_H, {
       spacing,
-      maxDotRadiusRatio: CONFIG.maxDotRadiusRatio,
+      maxDotRadiusRatio: DEFAULT_CONFIG.maxDotRadiusRatio,
       brightThreshold,
     }).then((d) => {
-      if (alive) {
+      if (active) {
         circleRefs.current = new Array(d.length).fill(null);
         setDots(d);
       }
     });
-    return () => { alive = false; };
+    return () => { active = false; };
   }, [imageUrl, spacing, brightThreshold]);
 
-  // Left-to-right reveal sweep (direct DOM mutation, no React re-render)
+  // Primary animation loop: Continuous left-to-right traveling wave
   useEffect(() => {
     if (dots.length === 0 || prefersReducedMotion) return;
 
-    const start = performance.now();
+    const startTime = performance.now();
+    const waveLength = STABLE_W * 1.5; // How wide the wave is
 
-    const tick = (now: number) => {
-      const t = (now - start) / 1000; // seconds elapsed
+    const frame = (now: number) => {
+      const elapsed = (now - startTime) / 1000;
+      const shift = elapsed * sweepSpeed;
 
       for (let i = 0; i < dots.length; i++) {
         const circle = circleRefs.current[i];
         if (!circle) continue;
         const dot = dots[i];
 
-        // sweepFront advances from x=0 → x=SAMPLE_W over time
-        const front = t * sweepSpeed;
-        const progress = front - dot.x;
+        // Position along the moving wave, wraps around
+        const wavePos = ((dot.x - shift) % waveLength + waveLength) % waveLength;
+        const phase = wavePos / waveLength; // 0 to 1
 
-        let reveal = 0;
-        if (progress > 0) {
-          reveal = Math.min(1, progress / sweepSoftness);
+        let multiplier = 0.1; // Minimum visibility (10%)
+        
+        // Easing function for smooth transitions
+        const smooth = (x: number) => x * x * (3 - 2 * x);
+
+        // 0 to 20%: Fade In
+        if (phase < 0.2) {
+          multiplier = 0.1 + 0.9 * smooth(phase / 0.2);
+        } 
+        // 20% to 80%: Fully Revealed
+        else if (phase < 0.8) {
+          multiplier = 1.0;
+        } 
+        // 80% to 100%: Fade Out smoothly back to 10%
+        else {
+          multiplier = 1.0 - 0.9 * smooth((phase - 0.8) / 0.2);
         }
 
-        circle.setAttribute("r", (dot.baseRadius * reveal).toFixed(2));
+        circle.setAttribute("r", (dot.baseRadius * multiplier).toFixed(2));
       }
 
-      rafRef.current = requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(frame);
     };
 
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [dots, prefersReducedMotion, sweepSpeed, sweepSoftness]);
+  }, [dots, prefersReducedMotion, sweepSpeed]);
 
   return (
-    <svg
-      viewBox={`0 0 ${SAMPLE_W} ${SAMPLE_H}`}
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-      style={{ display: "block", width: "100%", height: "100%" }}
+    <div 
+      className={`relative w-full h-full pointer-events-none ${className}`}
+      style={{ minHeight: "500px" }}
     >
-      <g fill="#000000">
-        {dots.map((dot, i) => (
-          <circle
-            key={i}
-            ref={(el) => { circleRefs.current[i] = el; }}
-            cx={dot.x}
-            cy={dot.y}
-            // Static for reduced-motion; starts at 0 and is driven by animation loop otherwise
-            r={prefersReducedMotion ? dot.baseRadius : 0}
-          />
-        ))}
-      </g>
-    </svg>
+      <svg
+        viewBox={`0 0 ${STABLE_W} ${STABLE_H}`}
+        xmlns="http://www.w3.org/2000/svg"
+        // Positioned at top-70% so the visual center of the hands sits 
+        // well below the center of the hero section, framing the bottom.
+        className="absolute top-[70%] left-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{ 
+          width: "120vw",  // Force overscan beyond viewport edges
+          height: "auto",
+          minWidth: "1600px", // Prevent collapsing on small viewports
+          display: "block",
+          overflow: "visible" 
+        }}
+        aria-hidden="true"
+      >
+        <g fill="black">
+          {dots.map((dot, i) => (
+            <circle
+              key={i}
+              ref={(el) => { circleRefs.current[i] = el; }}
+              cx={dot.x}
+              cy={dot.y}
+              r={prefersReducedMotion ? dot.baseRadius : 0}
+            />
+          ))}
+        </g>
+      </svg>
+    </div>
   );
 }
