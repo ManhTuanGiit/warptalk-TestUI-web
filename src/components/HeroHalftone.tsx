@@ -33,6 +33,8 @@ export function HeroHalftone({
 }: HeroHalftoneProps) {
   const [dots, setDots] = useState<HalftoneDot[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -40,6 +42,22 @@ export function HeroHalftone({
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Isolate hero animation lifecycle: strictly pause/hide when offscreen
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { rootMargin: "20% 0px 20% 0px" } // Keep active slightly before/after viewport
+    );
+    
+    observer.observe(el);
+    return () => observer.unobserve(el);
   }, []);
 
   // Generate dots once based on the stable coordinate system
@@ -57,8 +75,9 @@ export function HeroHalftone({
 
   return (
     <div 
+      ref={containerRef}
       className={`relative w-full h-full pointer-events-none ${className}`}
-      style={{ minHeight: "500px" }}
+      style={{ minHeight: "500px", visibility: isVisible ? "visible" : "hidden" }}
     >
       <svg
         viewBox={`0 0 ${STABLE_W} ${STABLE_H}`}
@@ -76,23 +95,40 @@ export function HeroHalftone({
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id="sweep-gradient" gradientUnits="userSpaceOnUse" x1="-1500" y1="0" x2="0" y2="0">
+          <linearGradient id="sweep-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1500" y2="0">
             {/* 20% opacity at ends, 100% in the middle. #333333 is 20% white. */}
             <stop offset="0%" stopColor="#333333" />
             <stop offset="25%" stopColor="#ffffff" />
             <stop offset="75%" stopColor="#ffffff" />
             <stop offset="100%" stopColor="#333333" />
-            {!prefersReducedMotion && (
-              <animate attributeName="x1" values="-1500; 2800" dur="8s" repeatCount="indefinite" />
-            )}
-            {!prefersReducedMotion && (
-              <animate attributeName="x2" values="0; 4300" dur="8s" repeatCount="indefinite" />
-            )}
           </linearGradient>
           <mask id="sweep-mask">
-            <rect x="-1500" y="0" width="6000" height="100%" fill="url(#sweep-gradient)" />
+            {/* Base 20% visibility across the whole canvas */}
+            <rect x="0" y="0" width="100%" height="100%" fill="#333333" />
+            
+            {/* Animated bright sweep band */}
+            <rect 
+              x="0" 
+              y="0" 
+              width="1500" 
+              height="100%" 
+              fill="url(#sweep-gradient)" 
+              style={prefersReducedMotion ? {} : {
+                animation: "halftone-sweep 8s linear infinite",
+                animationPlayState: isVisible ? "running" : "paused"
+              }}
+            />
           </mask>
         </defs>
+
+        <style>
+          {`
+            @keyframes halftone-sweep {
+              0% { transform: translateX(-1500px); }
+              100% { transform: translateX(${STABLE_W + 500}px); }
+            }
+          `}
+        </style>
 
         <g fill="black" mask="url(#sweep-mask)">
           {dots.map((dot, i) => (

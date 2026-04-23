@@ -41,7 +41,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
-      <body suppressHydrationWarning className="min-h-screen font-sans antialiased bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-700 ease-in-out">
+      {/* Stable global white background. Section-local styling is used instead of global flips. */}
+      <body suppressHydrationWarning className="min-h-screen font-sans antialiased bg-white text-slate-900">
         <Providers>
           <GlobalBackground />
           {children}
