@@ -21,17 +21,22 @@ export function useThemeOnScroll(threshold = 0.5) {
       threshold: 0,
     };
 
+    let lockTimeout: NodeJS.Timeout;
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Scrolled down past the trigger threshold
-          setTheme("dark");
-        } else {
-          // If the element leaves the screen downwards (scrolling back to hero)
-          if (entry.boundingClientRect.top > 0) {
-            setTheme("light");
+        clearTimeout(lockTimeout);
+        lockTimeout = setTimeout(() => {
+          if (entry.isIntersecting) {
+            // Scrolled down past the trigger threshold
+            setTheme("dark");
+          } else {
+            // If the element leaves the screen downwards (scrolling back to hero)
+            if (entry.boundingClientRect.top > 0) {
+              setTheme("light");
+            }
           }
-        }
+        }, 50); // 50ms debounce to prevent rapid flipping during layout shifts
       });
     }, observerOptions);
 
@@ -39,6 +44,7 @@ export function useThemeOnScroll(threshold = 0.5) {
 
     return () => {
       observer.unobserve(element);
+      clearTimeout(lockTimeout);
     };
   }, [setTheme, threshold]);
 
