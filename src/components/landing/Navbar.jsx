@@ -4,33 +4,35 @@ import { Languages } from "lucide-react";
 
 export function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 py-6 px-6 md:px-12 pointer-events-auto">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <Languages className="h-6 w-6 text-[var(--ht-text)] transition-transform group-hover:scale-105" />
-          <span className="font-semibold text-lg tracking-tight text-[var(--ht-text)] uppercase letter-spacing-wide">WarpTalk</span>
-        </Link>
-
-        {/* Links (Desktop) */}
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium text-[var(--ht-text)] opacity-80">
-          <Link href="#features" className="hover:opacity-100 transition-opacity">Features</Link>
-          <Link href="#solutions" className="hover:opacity-100 transition-opacity">Solutions</Link>
-          <Link href="#pricing" className="hover:opacity-100 transition-opacity">Pricing</Link>
-          <Link href="#contact" className="hover:opacity-100 transition-opacity">Contact</Link>
-        </div>
-
-        {/* CTA */}
-        <div className="flex items-center gap-6 text-sm font-medium">
-          <Link href="/login" className="hidden sm:block text-[var(--ht-text)] opacity-80 hover:opacity-100 transition-opacity">
-            Log in
+    <div className="fixed top-6 left-0 right-0 z-50 px-4 md:px-8 flex justify-center pointer-events-none">
+      <nav className="w-full max-w-5xl bg-white/35 backdrop-blur-md backdrop-saturate-200 border border-gray-300/30 rounded-2xl py-3 px-6 md:px-8 shadow-sm pointer-events-auto">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <Languages className="h-6 w-6 text-slate-900 transition-transform group-hover:scale-105" />
+            <span className="font-semibold text-lg tracking-tight text-slate-900 uppercase">WarpTalk</span>
           </Link>
-          <Link href="/register" className="bg-[var(--ht-text)] text-[var(--ht-bg)] px-6 py-2.5 rounded-full transition-transform hover:scale-105 shadow-sm">
-            Get Started
-          </Link>
+
+          {/* Links (Desktop) */}
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
+            <Link href="#features" className="hover:text-black transition-colors">Features</Link>
+            <Link href="#solutions" className="hover:text-black transition-colors">Solutions</Link>
+            <Link href="#pricing" className="hover:text-black transition-colors">Pricing</Link>
+            <Link href="#contact" className="hover:text-black transition-colors">Contact</Link>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-6 text-sm font-medium">
+            <Link href="/login" className="hidden sm:block text-slate-700 hover:text-black transition-colors">
+              Log in
+            </Link>
+            <Link href="/register" className="bg-black text-white px-6 py-2 rounded-full transition-transform hover:scale-105 shadow-sm">
+              Get Started
+            </Link>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
 
