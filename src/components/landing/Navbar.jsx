@@ -8,29 +8,31 @@ export function Navbar() {
   const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
-    // Find the case study section once it mounts
-    const caseStudySection = document.getElementById("case-studies");
-    if (!caseStudySection) return;
+    let ticking = false;
 
-    // We want to hide the navbar slightly before the case study section reaches the top,
-    // or when it intersects with the top of the viewport.
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsHidden(entry.isIntersecting);
-      },
-      {
-        root: null,
-        // Trigger when the section reaches the top 100px of the screen
-        rootMargin: "-100px 0px 0px 0px",
-        threshold: 0,
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const zone = document.getElementById("case-studies-sticky-zone");
+          if (zone) {
+            const rect = zone.getBoundingClientRect();
+            // Hide navbar if the top of the sticky zone is near or above the viewport top,
+            // AND the bottom of the sticky zone hasn't passed the top of the viewport yet.
+            const isZoneActive = rect.top <= 100 && rect.bottom >= 100;
+            setIsHidden(isZoneActive);
+          } else {
+            setIsHidden(false); // Failsafe
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
-    );
-
-    observer.observe(caseStudySection);
-
-    return () => {
-      observer.unobserve(caseStudySection);
     };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (

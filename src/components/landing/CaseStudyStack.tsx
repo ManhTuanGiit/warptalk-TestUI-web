@@ -31,7 +31,8 @@ export function CaseStudyStack() {
       {/* The sticky full-viewport immersive stack */}
       <div 
         ref={containerRef}
-        style={{ height: `${caseStudies.length * 100}vh` }}
+        id="case-studies-sticky-zone"
+        style={{ height: `${caseStudies.length * 150}vh` }} // Increased scroll distance as requested
         className="relative w-full"
       >
         <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden px-4 md:px-8 py-8">

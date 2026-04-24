@@ -26,33 +26,48 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
   // p2: The next card is fully active (covering this one)
   const p2 = (index + 1) / totalCards;
   
-  // To avoid Web Animations API crash ("Offsets must be monotonically non-decreasing"),
-  // we must ensure our scroll progress ranges are strictly between [0, 1].
-  // Since index 0 would yield a negative p0, we truncate the input/output arrays for the first card.
+  const cardDuration = 1 / totalCards;
+  const slotStart = index * cardDuration;
+  const slotEnd = (index + 1) * cardDuration;
+
+  // Phase calculations
+  const enterStart = slotStart - 0.35 * cardDuration;
+  const holdStart = slotStart + 0.1 * cardDuration;
+  const exitStart = slotEnd - 0.35 * cardDuration;
+  const exitEnd = slotEnd + 0.1 * cardDuration;
+
+  // Build strict arrays for WAAPI bounds (must be between 0 and 1, monotonically increasing)
   const isFirst = index === 0;
+  const isLast = index === totalCards - 1;
 
-  const inputR = isFirst ? [p1, p2] : [p0, p1, p2];
-  
-  // Y offset: Slides in from 100vh below, reaches 0 at p1, then drifts up to -4vh
-  const y = useTransform(
-    progress,
-    inputR,
-    isFirst ? ["0vh", "-4vh"] : ["100vh", "0vh", "-4vh"]
-  );
-  
-  // Scale: 1 until it's active, then shrinks down to 0.94 as it gets covered
-  const scale = useTransform(
-    progress,
-    inputR,
-    isFirst ? [1, 0.94] : [1, 1, 0.94]
-  );
+  let inputR: number[] = [];
+  let yVals: string[] = [];
+  let scaleVals: number[] = [];
+  let opacityVals: number[] = [];
 
-  // Opacity: 1 until it's active, then fades to 0.4
-  const opacity = useTransform(
-    progress,
-    inputR,
-    isFirst ? [1, 0.4] : [1, 1, 0.4]
-  );
+  if (isFirst) {
+    // First card: No enter phase, just hold and exit
+    inputR = [0, exitStart, Math.min(exitEnd, 1)];
+    yVals = ["0vh", "0vh", "-6vh"];
+    scaleVals = [1, 1, 0.95];
+    opacityVals = [1, 1, 0.25];
+  } else if (isLast) {
+    // Last card: Enter and hold, no exit phase
+    inputR = [Math.max(enterStart, 0), holdStart, 1];
+    yVals = ["100vh", "0vh", "0vh"];
+    scaleVals = [0.96, 1, 1];
+    opacityVals = [0, 1, 1];
+  } else {
+    // Middle cards: Enter, hold, and exit
+    inputR = [Math.max(enterStart, 0), holdStart, exitStart, Math.min(exitEnd, 1)];
+    yVals = ["100vh", "0vh", "0vh", "-6vh"];
+    scaleVals = [0.96, 1, 1, 0.95];
+    opacityVals = [0, 1, 1, 0.25];
+  }
+
+  const y = useTransform(progress, inputR, yVals);
+  const scale = useTransform(progress, inputR, scaleVals);
+  const opacity = useTransform(progress, inputR, opacityVals);
 
   return (
     <motion.div
