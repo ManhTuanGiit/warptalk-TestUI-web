@@ -9,17 +9,28 @@ export function Navbar() {
 
   useEffect(() => {
     let ticking = false;
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
 
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const isScrollingDown = currentScrollY > lastScrollY;
+          lastScrollY = currentScrollY;
+
           const zone = document.getElementById("case-studies-sticky-zone");
           if (zone) {
             const rect = zone.getBoundingClientRect();
-            // Hide navbar if the top of the sticky zone is near or above the viewport top,
-            // AND the bottom of the sticky zone hasn't passed the top of the viewport yet.
+            // Zone is active if its top is near/above the viewport, and bottom is below 100px.
             const isZoneActive = rect.top <= 100 && rect.bottom >= 100;
-            setIsHidden(isZoneActive);
+            
+            // Hide ONLY if we are actively inside the zone AND scrolling down.
+            // If scrolling up, always show it.
+            if (isZoneActive && isScrollingDown) {
+              setIsHidden(true);
+            } else {
+              setIsHidden(false);
+            }
           } else {
             setIsHidden(false); // Failsafe
           }
