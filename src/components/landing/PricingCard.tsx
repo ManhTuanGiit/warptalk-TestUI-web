@@ -138,25 +138,53 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
       </div>
 
       {/* ── CTA REGION (inside the outer frame, bottom-right) ──────── */}
-      <button
-        className="absolute flex items-center justify-center font-bold text-[10px] uppercase tracking-widest cursor-pointer transition-transform hover:scale-[1.03] active:scale-[0.98]"
-        style={{
-          bottom: pad, right: pad,
-          width: ctaW, height: ctaH,
-          borderRadius: r,
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          background: ctaBg,
-          border: `1px solid ${ctaBorder}`,
-          boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.04)",
-          color: txt,
-          outline: "none",
-          letterSpacing: "0.1em",
-          ...(DEBUG ? { outline: "2px solid green" } : {}),
-        }}
-      >
-        {plan.ctaLabel}
-      </button>
+      {plan.id === "enterprise" ? (
+        <a
+          href="#contact"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="absolute flex items-center justify-center font-bold text-[10px] uppercase tracking-widest cursor-pointer transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          style={{
+            bottom: pad, right: pad,
+            width: ctaW, height: ctaH,
+            borderRadius: r,
+            backdropFilter: "blur(20px) saturate(180%)",
+            WebkitBackdropFilter: "blur(20px) saturate(180%)",
+            background: ctaBg,
+            border: `1px solid ${ctaBorder}`,
+            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.04)",
+            color: txt,
+            outline: "none",
+            letterSpacing: "0.1em",
+            textDecoration: "none",
+            ...(DEBUG ? { outline: "2px solid green" } : {}),
+          }}
+        >
+          {plan.ctaLabel}
+        </a>
+      ) : (
+        <button
+          className="absolute flex items-center justify-center font-bold text-[10px] uppercase tracking-widest cursor-pointer transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          style={{
+            bottom: pad, right: pad,
+            width: ctaW, height: ctaH,
+            borderRadius: r,
+            backdropFilter: "blur(20px) saturate(180%)",
+            WebkitBackdropFilter: "blur(20px) saturate(180%)",
+            background: ctaBg,
+            border: `1px solid ${ctaBorder}`,
+            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.04)",
+            color: txt,
+            outline: "none",
+            letterSpacing: "0.1em",
+            ...(DEBUG ? { outline: "2px solid green" } : {}),
+          }}
+        >
+          {plan.ctaLabel}
+        </button>
+      )}
 
     </div>
   );

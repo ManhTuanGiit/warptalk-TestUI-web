@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { CaseStudyStack } from "@/components/landing/CaseStudyStack";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { ContactSection } from "@/components/landing/ContactSection";
 
 export default function HomePage() {
   return (
@@ -8,6 +9,7 @@ export default function HomePage() {
       <HeroSection />
       <CaseStudyStack />
       <PricingSection />
+      <ContactSection />
       
       {/* Additional sections like Features, Testimonials will go here */}
     </main>
