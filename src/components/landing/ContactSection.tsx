@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { FractalGlassSlot } from "./FractalGlassSlot";
 
 // ─── Tunable Layout Constants ─────────────────────────────────────────────────
 const FRACTAL_SLOT_MIN_HEIGHT = 220;
@@ -144,22 +145,10 @@ export function ContactSection() {
               </div>
 
               {/* Fractal Glass UI Slot */}
-              <div
-                className="flex-1 flex items-center justify-center rounded-[16px] mt-2"
-                style={{
-                  minHeight: FRACTAL_SLOT_MIN_HEIGHT,
-                  background: "rgba(255, 255, 255, 0.78)",
-                  backdropFilter: "blur(16px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(16px) saturate(180%)",
-                  border: "1px solid rgba(209, 213, 219, 0.3)",
-                  ...dbg("purple"),
-                }}
-                data-slot="fractal-glass"
-              >
-                <span className="text-black/40 text-sm font-medium tracking-wide select-none">
-                  Fractal Glass UI
-                </span>
-              </div>
+              <FractalGlassSlot
+                className="mt-2"
+                minHeight={FRACTAL_SLOT_MIN_HEIGHT}
+              />
             </div>
 
             {/* ── RIGHT COLUMN (Contact Form) ────────────────── */}
