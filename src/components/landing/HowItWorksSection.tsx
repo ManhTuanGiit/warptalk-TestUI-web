@@ -51,14 +51,14 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="py-24 px-4 md:px-8 bg-background relative border-t border-white/5">
+    <section className="py-24 px-4 md:px-8 bg-background relative border-t border-slate-900/5">
       <div className="max-w-6xl mx-auto flex flex-col items-center">
 
         <div className="text-center max-w-2xl mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+          <h2 className="section-heading">
             How it works
           </h2>
-          <p className="text-lg text-muted-foreground font-light px-4 py-2 rounded-full border border-white/10 bg-white/5 inline-block">
+          <p className="section-subtitle px-4 py-2 rounded-full premium-border bg-slate-900/5 inline-block">
             Near real-time, designed for natural conversation.
           </p>
         </div>
@@ -69,7 +69,7 @@ export function HowItWorksSection() {
             <TabsList className="grid w-full grid-cols-6 mb-8 bg-transparent">
               {steps.map((step) => (
                 <TabsTrigger key={step.id} value={step.id} className="flex flex-col gap-2 h-auto py-3">
-                  <div className="p-2 rounded-full bg-white/5 border border-white/10">
+                  <div className="p-2 rounded-full bg-slate-900/5 border border-slate-900/10 text-slate-700">
                     {step.icon}
                   </div>
                   <span className="text-xs">{step.title}</span>
@@ -79,15 +79,15 @@ export function HowItWorksSection() {
 
             {steps.map((step) => (
               <TabsContent key={step.id} value={step.id}>
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-2xl">
                       {step.icon} {step.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-lg text-slate-300 mb-2">{step.description}</p>
-                    <p className="text-sm text-slate-500">{step.detail}</p>
+                    <p className="text-lg text-slate-900 mb-2">{step.description}</p>
+                    <p className="text-sm readable-muted">{step.detail}</p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -98,20 +98,20 @@ export function HowItWorksSection() {
         {/* Mobile Layout: Stacked Cards */}
         <div className="md:hidden flex flex-col gap-4 w-full">
           {steps.map((step, index) => (
-            <Card key={step.id} className="bg-white/5 border-white/10 backdrop-blur-md relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-white/5 leading-none select-none">
+            <Card key={step.id} className="glass-card relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 text-[60px] font-black text-slate-900/5 leading-none select-none">
                 {index + 1}
               </div>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="p-1.5 rounded bg-white/10 text-white">
+                  <div className="p-1.5 rounded bg-slate-900/5 text-slate-900">
                     {step.icon}
                   </div>
                   {step.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-slate-300 text-sm">
+                <CardDescription className="readable-muted text-sm">
                   {step.description}
                 </CardDescription>
               </CardContent>

@@ -130,3 +130,31 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  .glass-card {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    color: #334155;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.05);
+  }
+
+  .section-heading {
+    @apply text-3xl md:text-5xl font-bold tracking-tight text-slate-950 mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-slate-700 font-light leading-relaxed;
+  }
+
+  .readable-muted {
+    @apply text-slate-600;
+  }
+
+  .premium-border {
+    @apply border border-slate-900/10;
+  }
+}

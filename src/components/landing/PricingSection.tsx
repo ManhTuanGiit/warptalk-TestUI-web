@@ -11,16 +11,16 @@ export function PricingSection() {
 
   return (
     <section className="bg-background text-foreground py-24 relative z-20 overflow-hidden" id="pricing">
-      {/* Background glassmorphism orbs - updated to dark premium theme */}
-      <div className="absolute top-[10%] left-[10%] w-[600px] h-[600px] bg-white/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-slate-800/30 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      {/* Background glassmorphism orbs */}
+      <div className="absolute top-[10%] left-[10%] w-[600px] h-[600px] bg-emerald-100/40 rounded-full blur-[120px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[100px] -z-10 pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <h2 className="section-heading">
             Simple pricing for every stage
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground font-light leading-relaxed max-w-xl mx-auto">
+          <p className="section-subtitle max-w-xl mx-auto">
             Choose the plan that best fits your needs. Scale effortlessly as you grow.
           </p>
 
@@ -35,7 +35,7 @@ export function PricingSection() {
         </div>
       </div>
 
-      <div className="relative z-10 bg-white/5 backdrop-blur-3xl border-t border-white/10 mt-20">
+      <div className="relative z-10 bg-white/40 backdrop-blur-3xl border-t border-slate-900/10 mt-20">
         <PricingComparisonTable />
       </div>
     </section>

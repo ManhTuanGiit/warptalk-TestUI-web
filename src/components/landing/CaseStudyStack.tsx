@@ -14,17 +14,17 @@ export function CaseStudyStack() {
   });
 
   return (
-    <section
-      className="bg-white relative"
+    <section 
+      className="bg-background relative"
       id="case-studies"
     >
       {/* Small intro area that scrolls past normally */}
       <div className="w-full max-w-7xl mx-auto pt-32 pb-12 px-6 md:px-12 text-center md:text-left">
-        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-slate-900">
-          Selected Work
+        <h2 className="section-heading">
+          Use Cases
         </h2>
-        <p className="text-slate-500 mt-4 text-lg font-light max-w-2xl">
-          See how the world&apos;s leading organizations are using WarpTalk to remove borders from their operations.
+        <p className="section-subtitle mt-4 max-w-2xl mx-auto md:mx-0">
+          See how WarpTalk removes borders from everyday operations.
         </p>
       </div>
 

@@ -53,13 +53,13 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
   ].join(" ");
 
   // ── Glass colours ───────────────────────────────────────────────
-  const mainBg     = isPopular ? "rgba(255,255,255,0.08)" : "rgba(20,20,20,0.4)";
-  const mainBorder = isPopular ? "rgba(255,255,255,0.2)"  : "rgba(255,255,255,0.08)";
-  const ctaBg      = isPopular ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";
-  const ctaBorder  = isPopular ? "rgba(255,255,255,0.3)"  : "rgba(255,255,255,0.1)";
-  const frameBg    = isPopular ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.2)";
-  const frameBrd   = isPopular ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";
-  const txt        = "white";
+  const mainBg     = isPopular ? "rgba(15,23,42,0.95)" : "rgba(255,255,255,0.85)";
+  const mainBorder = isPopular ? "rgba(15,23,42,1)"  : "rgba(15,23,42,0.1)";
+  const ctaBg      = isPopular ? "rgba(255,255,255,1)" : "rgba(15,23,42,0.05)";
+  const ctaBorder  = isPopular ? "rgba(255,255,255,0.3)"  : "rgba(15,23,42,0.1)";
+  const frameBg    = isPopular ? "rgba(15,23,42,0.05)" : "rgba(255,255,255,0.5)";
+  const frameBrd   = isPopular ? "rgba(15,23,42,0.1)" : "rgba(15,23,42,0.05)";
+  const txt        = isPopular ? "white" : "#0f172a";
 
   return (
     /* ── OUTER FRAME ─────────────────────────────────────────────── */
@@ -104,14 +104,14 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
       >
         {isPopular && (
           <div className="mb-3">
-            <span className="px-3 py-1 bg-white/10 border border-white/20 text-white text-[9px] font-bold uppercase tracking-widest rounded-full">
+            <span className="px-3 py-1 bg-white/20 border border-white/30 text-white text-[9px] font-bold uppercase tracking-widest rounded-full">
               Most Popular
             </span>
           </div>
         )}
 
         <h3 className="text-lg font-bold mb-1 tracking-tight">{plan.name}</h3>
-        <p className={`text-[11px] mb-4 leading-relaxed ${isPopular ? "text-slate-300" : "text-white/60"}`}>
+        <p className={`text-[11px] mb-4 leading-relaxed ${isPopular ? "text-slate-200" : "readable-muted"}`}>
           {plan.description}
         </p>
 
@@ -119,7 +119,7 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
           <span className="text-4xl font-extrabold tracking-tight">
             {isCustom ? price : `$${price}`}
           </span>
-          <span className={`text-[11px] font-semibold ml-1 ${isPopular ? "text-slate-400" : "text-white/50"}`}>
+          <span className={`text-[11px] font-semibold ml-1 ${isPopular ? "text-slate-300" : "readable-muted"}`}>
             {billingCycle}
           </span>
         </div>
@@ -128,10 +128,10 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
         <ul className="flex flex-col gap-2.5 mt-auto" style={{ maxWidth: iW - cutW - 8 }}>
           {plan.features.map((feature, i) => (
             <li key={i} className="flex items-start gap-2.5 text-[11px] font-medium leading-tight">
-              <div className={`flex items-center justify-center rounded-full w-4 h-4 shrink-0 mt-0.5 ${isPopular ? "bg-white/20" : "bg-white/10"}`}>
-                <Check className={`w-2.5 h-2.5 ${isPopular ? "text-white" : "text-white"}`} strokeWidth={3} />
+              <div className={`flex items-center justify-center rounded-full w-4 h-4 shrink-0 mt-0.5 ${isPopular ? "bg-white/20" : "bg-slate-900/10"}`}>
+                <Check className={`w-2.5 h-2.5 ${isPopular ? "text-white" : "text-slate-950"}`} strokeWidth={3} />
               </div>
-              <span className={isPopular ? "text-slate-200" : "text-slate-300"}>{feature}</span>
+              <span className={isPopular ? "text-slate-200" : "text-slate-700"}>{feature}</span>
             </li>
           ))}
         </ul>
@@ -154,8 +154,8 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
             WebkitBackdropFilter: "blur(20px) saturate(180%)",
             background: ctaBg,
             border: `1px solid ${ctaBorder}`,
-            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.04)",
-            color: txt,
+            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(15,23,42,0.04)",
+            color: isPopular ? "#0f172a" : txt,
             outline: "none",
             letterSpacing: "0.1em",
             textDecoration: "none",
@@ -175,8 +175,8 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
             WebkitBackdropFilter: "blur(20px) saturate(180%)",
             background: ctaBg,
             border: `1px solid ${ctaBorder}`,
-            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.04)",
-            color: txt,
+            boxShadow: isPopular ? "0 8px 20px rgba(0,0,0,0.12)" : "0 4px 12px rgba(15,23,42,0.04)",
+            color: isPopular ? "#0f172a" : txt,
             outline: "none",
             letterSpacing: "0.1em",
             ...(DEBUG ? { outline: "2px solid green" } : {}),
