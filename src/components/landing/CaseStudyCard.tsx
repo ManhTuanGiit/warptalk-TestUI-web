@@ -58,11 +58,11 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
     >
       <div className="w-full h-full flex flex-col md:flex-row">
         {/* Left Column - Image */}
-        <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[600px] bg-[#222225] relative overflow-hidden flex items-center justify-center p-8">
+        <div className="w-full md:w-1/2 h-[300px] md:h-full bg-[#222225] relative overflow-hidden">
           <motion.img
             src={study.imageUrl}
             alt={study.title}
-            className="w-full max-w-md h-auto object-cover rounded-xl shadow-2xl relative z-20"
+            className="w-full h-full object-cover relative z-20"
             initial={{ scale: 1.05 }}
             whileInView={{ scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}

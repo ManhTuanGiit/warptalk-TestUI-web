@@ -14,7 +14,7 @@ export function CaseStudyStack() {
   });
 
   return (
-    <section 
+    <section
       className="bg-white relative"
       id="case-studies"
     >
@@ -37,7 +37,7 @@ export function CaseStudyStack() {
       >
         <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden px-4 md:px-8 py-8">
 
-          <div className="relative w-full max-w-[1560px] w-[92vw] h-[80vh] md:h-[86vh] min-h-[680px] flex justify-center">
+          <div className="relative w-[1280vw] max-w-[1280px] h-[80vh] min-h-[620px] max-h-[600px] flex justify-center">
             {caseStudies.map((study, i) => {
               return (
                 <div key={study.id} className="absolute inset-0 w-full h-full">
