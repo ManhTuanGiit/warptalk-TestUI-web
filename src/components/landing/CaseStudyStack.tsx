@@ -15,7 +15,7 @@ export function CaseStudyStack() {
 
   return (
     <section 
-      className="bg-background relative"
+      className="bg-white relative"
       id="case-studies"
     >
       {/* Small intro area that scrolls past normally */}
