@@ -53,13 +53,13 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
   ].join(" ");
 
   // ── Glass colours ───────────────────────────────────────────────
-  const mainBg     = isPopular ? "rgba(10,10,10,0.72)"    : "rgba(255,255,255,0.36)";
-  const mainBorder = isPopular ? "rgba(255,255,255,0.14)" : "rgba(148,163,184,0.28)";
-  const ctaBg      = isPopular ? "rgba(16,18,24,0.88)"    : "rgba(255,255,255,0.65)";
-  const ctaBorder  = isPopular ? "rgba(255,255,255,0.18)" : "rgba(148,163,184,0.40)";
-  const frameBg    = isPopular ? "rgba(10,10,10,0.08)"    : "rgba(255,255,255,0.08)";
-  const frameBrd   = isPopular ? "rgba(255,255,255,0.05)" : "rgba(148,163,184,0.10)";
-  const txt        = isPopular ? "white" : "black";
+  const mainBg     = isPopular ? "rgba(255,255,255,0.08)" : "rgba(20,20,20,0.4)";
+  const mainBorder = isPopular ? "rgba(255,255,255,0.2)"  : "rgba(255,255,255,0.08)";
+  const ctaBg      = isPopular ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";
+  const ctaBorder  = isPopular ? "rgba(255,255,255,0.3)"  : "rgba(255,255,255,0.1)";
+  const frameBg    = isPopular ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.2)";
+  const frameBrd   = isPopular ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";
+  const txt        = "white";
 
   return (
     /* ── OUTER FRAME ─────────────────────────────────────────────── */
@@ -111,7 +111,7 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
         )}
 
         <h3 className="text-lg font-bold mb-1 tracking-tight">{plan.name}</h3>
-        <p className={`text-[11px] mb-4 leading-relaxed ${isPopular ? "text-slate-300" : "text-slate-500"}`}>
+        <p className={`text-[11px] mb-4 leading-relaxed ${isPopular ? "text-slate-300" : "text-white/60"}`}>
           {plan.description}
         </p>
 
@@ -119,7 +119,7 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
           <span className="text-4xl font-extrabold tracking-tight">
             {isCustom ? price : `$${price}`}
           </span>
-          <span className={`text-[11px] font-semibold ml-1 ${isPopular ? "text-slate-400" : "text-slate-500"}`}>
+          <span className={`text-[11px] font-semibold ml-1 ${isPopular ? "text-slate-400" : "text-white/50"}`}>
             {billingCycle}
           </span>
         </div>
@@ -128,10 +128,10 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
         <ul className="flex flex-col gap-2.5 mt-auto" style={{ maxWidth: iW - cutW - 8 }}>
           {plan.features.map((feature, i) => (
             <li key={i} className="flex items-start gap-2.5 text-[11px] font-medium leading-tight">
-              <div className={`flex items-center justify-center rounded-full w-4 h-4 shrink-0 mt-0.5 ${isPopular ? "bg-white/10" : "bg-black/5"}`}>
-                <Check className={`w-2.5 h-2.5 ${isPopular ? "text-white" : "text-black"}`} strokeWidth={3} />
+              <div className={`flex items-center justify-center rounded-full w-4 h-4 shrink-0 mt-0.5 ${isPopular ? "bg-white/20" : "bg-white/10"}`}>
+                <Check className={`w-2.5 h-2.5 ${isPopular ? "text-white" : "text-white"}`} strokeWidth={3} />
               </div>
-              <span className={isPopular ? "text-slate-200" : "text-slate-700"}>{feature}</span>
+              <span className={isPopular ? "text-slate-200" : "text-slate-300"}>{feature}</span>
             </li>
           ))}
         </ul>

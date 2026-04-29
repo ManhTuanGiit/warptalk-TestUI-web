@@ -15,10 +15,10 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
   // We want the card to stay pinned for a while.
   // The overall scroll container will have a height of `totalCards * 100vh`.
   // `progress` goes from 0 to 1 over the entire stack.
-  
+
   // A card becomes active when `progress` reaches `index / totalCards`.
   // A card starts to shrink and fade when `progress` reaches `(index + 1) / totalCards`.
-  
+
 
   const inputR: number[] = [];
   const outY: string[] = [];
@@ -29,7 +29,7 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
     // 1. Lock Point (Card j is fully active)
     const pLock = j / totalCards;
     inputR.push(pLock);
-    
+
     const dist = j - index;
     if (dist < 0) {
       // This card is incoming / waiting below
@@ -44,7 +44,7 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
     } else {
       // This card is pushed into the background stack.
       // Tighter compact stack: 16px offset per layer, 1.5% scale reduction per layer.
-      outY.push(`-${dist * 16}px`); 
+      outY.push(`-${dist * 16}px`);
       outScale.push(1 - dist * 0.015);
       outTextOpacity.push(0); // Content hidden to prevent text overlap
     }
@@ -53,7 +53,7 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
     if (j < totalCards) {
       const pHandoff = (j + 0.75) / totalCards;
       inputR.push(pHandoff);
-      
+
       if (dist < 0) {
         if (dist === -1) {
           // This card is the incoming card, it's 75% of the way up
@@ -95,8 +95,8 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
         {/* Left Column - Image */}
         <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[600px] bg-[#0a0a0a] relative overflow-hidden flex items-center justify-center p-8">
           {/* Grey gradient overlay removed to prevent washed-out look */}
-          <motion.img 
-            src={study.imageUrl} 
+          <motion.img
+            src={study.imageUrl}
             alt={study.title}
             className="w-full max-w-md h-auto object-cover rounded-xl shadow-2xl relative z-20"
             initial={{ scale: 1.05 }}
@@ -113,23 +113,23 @@ export function CaseStudyCard({ study, index, progress, totalCards }: CaseStudyC
             <span className="w-1 h-1 rounded-full bg-slate-600" />
             <span>{study.category}</span>
           </div>
-          
+
           <h3 className="text-sm font-medium text-slate-300 mb-4">{study.brand}</h3>
-          
+
           <h2 className="text-3xl md:text-5xl font-semibold text-white tracking-tight leading-tight mb-6">
             {study.title}
           </h2>
-          
+
           <p className="text-base md:text-lg text-slate-400 font-light leading-relaxed mb-10 max-w-lg">
             {study.description}
           </p>
-          
+
           <div className="flex items-center gap-4 mb-12">
             <button className="px-6 py-3 rounded-full bg-white text-black text-sm font-medium hover:scale-105 transition-transform shadow-lg">
               {study.ctaLabel}
             </button>
           </div>
-          
+
           {/* Metrics Row */}
           <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
             {study.metrics.map((metric, i) => (

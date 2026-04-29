@@ -7,14 +7,14 @@ import { CaseStudyCard } from "./CaseStudyCard";
 
 export function CaseStudyStack() {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
   return (
-    <section 
+    <section
       className="bg-white relative"
       id="case-studies"
     >
@@ -29,22 +29,22 @@ export function CaseStudyStack() {
       </div>
 
       {/* The sticky full-viewport immersive stack */}
-      <div 
+      <div
         ref={containerRef}
         id="case-studies-sticky-zone"
         style={{ height: `${caseStudies.length * 150}vh` }} // Increased scroll distance as requested
         className="relative w-full"
       >
         <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden px-4 md:px-8 py-8">
-          
+
           <div className="relative w-full max-w-[1560px] w-[92vw] h-[80vh] md:h-[86vh] min-h-[680px] flex justify-center">
             {caseStudies.map((study, i) => {
               return (
                 <div key={study.id} className="absolute inset-0 w-full h-full">
-                  <CaseStudyCard 
-                    study={study} 
-                    index={i} 
-                    progress={scrollYProgress} 
+                  <CaseStudyCard
+                    study={study}
+                    index={i}
+                    progress={scrollYProgress}
                     totalCards={caseStudies.length}
                   />
                 </div>
